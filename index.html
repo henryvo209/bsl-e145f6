@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Bảng thành tích salon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f4f5f8; --card: #ffffff; --ink: #14161c; --ink2: #4b4f5c; --muted: #8a8f9c;
+    --grid: #e6e8ee; --ring: rgba(20,22,28,0.08); --shadow: 0 1px 2px rgba(20,22,28,.04), 0 6px 20px rgba(20,22,28,.06);
+    --s872: #2a78d6; --s411: #eb6834;
+    --good: #0ca30c; --warn: #fab219; --serious: #ec835a; --crit: #d03b3b; --good-ink: #067a06;
+    --chip: #eef0f4; --accent: #1c5cab;
+    --hero1: #0d366b; --hero2: #1c5cab; --hero3: #2a78d6;
+    --gold: #f5b800; --gold-soft: #fff5d6; --silver: #a9b2bf; --bronze: #d08a4f;
+    --warm-soft: #fff1ea; --warm-ring: #f7c9b3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #0e0f12; --card: #1a1b20; --ink: #f0f1f4; --ink2: #c3c6cf; --muted: #8a8f9c;
+      --grid: #2a2c33; --ring: rgba(255,255,255,0.08); --shadow: 0 1px 2px rgba(0,0,0,.3);
+      --s872: #3987e5; --s411: #d95926; --good-ink: #2fc22f; --chip: #262830; --accent: #86b6ef;
+      --gold-soft: #2c2610; --warm-soft: #2a1a14; --warm-ring: #5e3324;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0e0f12; --card: #1a1b20; --ink: #f0f1f4; --ink2: #c3c6cf; --muted: #8a8f9c;
+    --grid: #2a2c33; --ring: rgba(255,255,255,0.08); --shadow: 0 1px 2px rgba(0,0,0,.3);
+    --s872: #3987e5; --s411: #d95926; --good-ink: #2fc22f; --chip: #262830; --accent: #86b6ef;
+    --gold-soft: #2c2610; --warm-soft: #2a1a14; --warm-ring: #5e3324;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink);
+    font: 15px/1.5 "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 16px 56px; }
+
+  /* ===== Banner đầu trang ===== */
+  .hero { background: linear-gradient(135deg, var(--hero1), var(--hero2) 55%, var(--hero3));
+    color: #fff; border-radius: 0 0 24px 24px; padding: 22px 20px 20px; margin: 0 -16px; position: relative; overflow: hidden; }
+  .hero::after { content: ""; position: absolute; right: -60px; top: -60px; width: 220px; height: 220px;
+    border-radius: 50%; background: rgba(255,255,255,.07); }
+  .hero .eyebrow { font-size: 12.5px; opacity: .8; letter-spacing: .3px; }
+  .hero h1 { font-size: 24px; font-weight: 800; margin: 2px 0 12px; letter-spacing: -.3px; }
+  .quote { background: rgba(255,255,255,.12); border-radius: 14px; padding: 12px 14px; font-size: 15px; font-weight: 500;
+    display: flex; gap: 10px; align-items: flex-start; position: relative; z-index: 1; }
+  .quote .ic { font-size: 20px; line-height: 1.2; }
+  .pulse { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; position: relative; z-index: 1; }
+  .pulse div { background: rgba(255,255,255,.1); border-radius: 12px; padding: 8px 10px; }
+  .pulse small { display: block; font-size: 11.5px; opacity: .8; }
+  .pulse b { font-size: 18px; font-weight: 700; }
+  .hero .upd { font-size: 12px; opacity: .75; margin-top: 10px; position: relative; z-index: 1; }
+
+  /* ===== Tiêu đề phần ===== */
+  .sec { margin-top: 26px; }
+  .sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .sec-h h2 { font-size: 18px; font-weight: 700; margin: 0; }
+  .sub { color: var(--muted); font-size: 13px; margin: 2px 0 12px; }
+  .card { background: var(--card); border-radius: 16px; box-shadow: var(--shadow), 0 0 0 1px var(--ring); padding: 16px; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+
+  /* Avatar chữ cái */
+  .av { width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    color: #fff; font-weight: 700; font-size: 13px; letter-spacing: .3px; }
+  .av.lg { width: 52px; height: 52px; font-size: 17px; box-shadow: 0 0 0 3px var(--card), 0 0 0 5px var(--gold); }
+  .tagS { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+
+  /* ===== Ngôi sao ngày ===== */
+  .star { position: relative; overflow: hidden; }
+  .star .bp { display: inline-block; font-size: 12px; font-weight: 600; color: var(--accent); background: var(--chip);
+    padding: 3px 10px; border-radius: 999px; }
+  .champ { display: flex; gap: 12px; align-items: center; margin: 14px 0 8px; }
+  .champ .n { font-weight: 700; font-size: 17px; line-height: 1.25; }
+  .champ .v { font-size: 24px; font-weight: 800; margin-left: auto; text-align: right; line-height: 1.1; }
+  .champ .v small { display: block; font-size: 11.5px; font-weight: 500; color: var(--muted); }
+  .praise { background: var(--gold-soft); border-radius: 10px; padding: 8px 10px; font-size: 13px; color: var(--ink2); }
+  .runner { list-style: none; padding: 0; margin: 10px 0 0; }
+  .runner li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px dashed var(--grid); font-size: 14px; }
+  .runner .m { width: 22px; text-align: center; }
+  .runner .v { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .crown { position: absolute; right: 12px; top: 10px; font-size: 22px; opacity: .9; }
+
+  /* ===== Nhắc hẹn lịch ===== */
+  .remind { background: var(--warm-soft); box-shadow: 0 0 0 1px var(--warm-ring); }
+  .remind .lead { font-size: 14px; color: var(--ink2); margin: 0 0 10px; }
+  .rrow { display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--warm-ring); }
+  .rrow:first-of-type { border-top: 0; }
+  .rrow .n { font-weight: 600; }
+  .rrow .msg { font-size: 12.5px; color: var(--ink2); margin-top: 4px; font-style: italic; }
+  .rrow .stat { font-size: 13px; color: var(--ink2); margin-top: 2px; }
+  .rrow .stat b { color: var(--ink); }
+  .rsum { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--ink2);
+    background: var(--card); border-radius: 10px; padding: 8px 12px; margin-bottom: 10px; }
+  .rsum b { color: var(--ink); }
+  .rrow .cnt { text-align: right; }
+  .rrow .cnt b { font-size: 20px; color: var(--crit); }
+  .rrow .cnt small { display: block; font-size: 11px; color: var(--muted); }
+  .mini { height: 6px; background: var(--chip); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+  .mini i { display: block; height: 100%; background: var(--good); border-radius: 0 3px 3px 0; }
+  .okbox { text-align: center; padding: 10px; font-weight: 600; color: var(--good-ink); }
+  .done { font-size: 13px; color: var(--good-ink); margin-top: 10px; }
+
+  /* ===== Bộ lọc ===== */
+  .ctl { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--page) 92%, transparent);
+    backdrop-filter: blur(8px); padding: 10px 0; margin-top: 26px; border-bottom: 1px solid var(--grid);
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .seg { display: inline-flex; background: var(--chip); border-radius: 999px; padding: 3px; }
+  .seg button { border: 0; background: transparent; color: var(--ink2); font: inherit; font-size: 13.5px;
+    padding: 6px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+  .seg button[aria-pressed="true"] { background: var(--card); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .dates { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink2); }
+  .dates input { font: inherit; font-size: 13.5px; padding: 5px 8px; border-radius: 10px; border: 1px solid var(--grid);
+    background: var(--card); color: var(--ink); }
+
+  /* ===== Tổng quan salon ===== */
+  .sal { border-top: 4px solid var(--c); }
+  .sal .h { display: flex; align-items: center; justify-content: space-between; }
+  .sal .nm { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+  .big { font-size: 32px; font-weight: 800; letter-spacing: -.5px; margin: 6px 0 0; }
+  .big small { font-size: 13px; font-weight: 500; color: var(--muted); }
+  .kv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0; }
+  .kv div { background: var(--chip); border-radius: 10px; padding: 8px 10px; font-size: 11.5px; color: var(--muted); }
+  .kv b { display: block; font-size: 16px; color: var(--ink); font-weight: 700; }
+  .mixrow { display: grid; grid-template-columns: 118px 1fr 58px; align-items: center; gap: 8px; font-size: 13px; margin: 6px 0; }
+  .mixrow .lab { color: var(--ink2); }
+  .mixrow .val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+  .track { height: 8px; background: var(--chip); border-radius: 4px; overflow: hidden; display: block; }
+  .track i { display: block; height: 100%; border-radius: 0 4px 4px 0; background: var(--c); }
+  .mp { color: var(--good-ink) !important; }
+
+  /* ===== Xếp hạng ===== */
+  .tabs { display: flex; gap: 6px; margin: 0 0 12px; flex-wrap: wrap; }
+  .tabs button { border: 1px solid var(--grid); background: var(--card); color: var(--ink2); font: inherit; font-size: 14px;
+    padding: 7px 16px; border-radius: 12px; cursor: pointer; }
+  .tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .dsum { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--ink2); padding-bottom: 10px;
+    margin-bottom: 4px; border-bottom: 1px solid var(--grid); }
+  .dsum b { color: var(--ink); }
+  .legend { display: flex; gap: 14px; font-size: 12.5px; color: var(--ink2); margin-bottom: 8px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .rank { list-style: none; margin: 0; padding: 0; }
+  .rank li { display: grid; grid-template-columns: 28px 36px 1fr; gap: 10px; padding: 11px 0; border-top: 1px solid var(--grid); align-items: start; }
+  .rank li:first-child { border-top: 0; }
+  .no { font-weight: 800; color: var(--muted); text-align: center; padding-top: 7px; font-size: 14px; }
+  .no.m1, .no.m2, .no.m3 { font-size: 18px; padding-top: 3px; }
+  .who { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .who .n { font-weight: 600; }
+  .who .v { font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .rbar { height: 8px; background: var(--chip); border-radius: 4px; margin: 6px 0; overflow: hidden; }
+  .rbar i { display: block; height: 100%; border-radius: 0 4px 4px 0; }
+  .meta { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 12.5px; color: var(--ink2); }
+  .meta b { color: var(--ink); font-weight: 600; }
+  .note { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
+
+  /* Hẹn lịch */
+  .hen { position: relative; height: 10px; background: var(--chip); border-radius: 5px; margin: 6px 0; }
+  .hen i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 5px 5px 0; }
+  .hen .goal { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink2); left: 50%; }
+  .tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 1px 9px; border-radius: 999px;
+    background: var(--chip); color: var(--ink2); font-weight: 500; }
+  .tag::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--muted)); }
+  .empty { color: var(--muted); font-size: 14px; padding: 6px 0; }
+
+  .closer { margin-top: 30px; text-align: center; padding: 20px 16px; border-radius: 18px;
+    background: linear-gradient(135deg, var(--hero1), var(--hero3)); color: #fff; }
+  .closer b { display: block; font-size: 17px; margin-bottom: 4px; }
+  .closer span { font-size: 13.5px; opacity: .85; }
+  footer { margin-top: 16px; font-size: 12px; color: var(--muted); text-align: center; }
+  #tip { position: fixed; pointer-events: none; z-index: 20; background: var(--ink); color: var(--page);
+    font-size: 12.5px; padding: 6px 9px; border-radius: 8px; opacity: 0; transition: opacity .1s; max-width: 240px; }
+  @media (max-width: 420px) { .kv { grid-template-columns: repeat(2, 1fr); } .champ .v { font-size: 20px; } .hero h1 { font-size: 21px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== Banner + câu truyền động lực ===== -->
+  <section class="hero">
+    <div class="eyebrow">872 QL22 · 411 NVT</div>
+    <h1>Bảng thành tích salon</h1>
+    <div class="quote"><span class="ic">💬</span><span id="quote"></span></div>
+    <div class="pulse" id="pulse"></div>
+    <div class="upd" id="upd"></div>
+  </section>
+
+  <!-- ===== 1. Ngôi sao ngày ===== -->
+  <section class="sec">
+    <div class="sec-h"><h2 id="tdTitle"></h2></div>
+    <p class="sub" id="tdSub"></p>
+    <div class="grid3" id="td"></div>
+  </section>
+
+  <!-- ===== 2. Nhắc hẹn lịch ===== -->
+  <section class="sec">
+    <div class="sec-h"><h2 id="cbTitle"></h2></div>
+    <p class="sub">Mục tiêu: 100% khách cắt xong đều được hẹn lịch lần sau trên app.</p>
+    <div class="card remind" id="cb"></div>
+  </section>
+
+  <!-- ===== Bộ lọc ===== -->
+  <div class="ctl">
+    <div class="seg" id="fSalon">
+      <button data-v="all">Cả 2 salon</button>
+      <button data-v="872">872 QL22</button>
+      <button data-v="411">411 NVT</button>
+    </div>
+    <div class="seg" id="fQuick">
+      <button data-v="d1">Ngày mới nhất</button>
+      <button data-v="d7">7 ngày</button>
+      <button data-v="mtd">Cả tháng</button>
+    </div>
+    <span class="dates">Từ <input type="date" id="dFrom"> đến <input type="date" id="dTo"></span>
+  </div>
+
+  <!-- ===== 3. Tổng quan salon ===== -->
+  <section class="sec">
+    <div class="sec-h"><h2>📊 Tổng quan salon</h2></div>
+    <p class="sub" id="subTong"></p>
+    <div class="grid2" id="tong"></div>
+  </section>
+
+  <!-- ===== 4. Xếp hạng bộ phận ===== -->
+  <section class="sec">
+    <div class="sec-h"><h2>🏅 Bảng xếp hạng</h2></div>
+    <p class="sub" id="subNv"></p>
+    <div class="tabs" id="fBp">
+      <button data-v="stl">✂️ Stylist</button>
+      <button data-v="skn">💆 Skinner</button>
+      <button data-v="sup">🤝 Sup</button>
+    </div>
+    <div class="card">
+      <div class="legend" id="lg"></div>
+      <div class="dsum" id="dsum"></div>
+      <ol class="rank" id="rank"></ol>
+      <p class="note" id="bpNote"></p>
+    </div>
+  </section>
+
+  <!-- ===== 5. Hẹn lịch theo kỳ ===== -->
+  <section class="sec">
+    <div class="sec-h"><h2>📅 Hẹn lịch khách sau cắt</h2></div>
+    <p class="sub" id="subHen"></p>
+    <div class="card">
+      <ol class="rank" id="henList"></ol>
+      <p class="note">Vạch đứng = mốc 50%. Hẹn ít &lt;30% · Hẹn khá 30–50% · Hẹn tốt ≥50%.</p>
+    </div>
+  </section>
+
+  <div class="closer"><b id="closerT"></b><span>Mỗi khách hài lòng hôm nay là nền móng cho thu nhập ngày mai.</span></div>
+  <footer>Nguồn: báo cáo 30Shine (0019 kết quả kinh doanh, 0035 hẹn lịch stylist) · DV = dịch vụ · MP = mỹ phẩm</footer>
+</div>
+<div id="tip"></div>
+
+<script src="data.js"></script>
+<script>
+  const D = window.DATA;
+  const COLOR = { "872": "var(--s872)", "411": "var(--s411)" };
+  const NGAY = Object.keys(D.ngay).sort(), NGAY_HEN = Object.keys(D.hen).sort();
+  const last = NGAY[NGAY.length - 1], lastHen = NGAY_HEN[NGAY_HEN.length - 1];
+  const st = { salon: "all", bp: "stl", from: last, to: last, quick: "d1" };
+
+  // ===== Câu truyền động lực (đổi theo ngày) =====
+  const QUOTES = [
+    "Mỗi khách hài lòng hôm nay là một khách quay lại ngày mai.",
+    "Tay nghề tạo nên khách quen, thái độ tạo nên khách ruột.",
+    "Không cần làm điều lớn lao – chỉ cần làm thật tốt từng khách một.",
+    "Một lời tư vấn chân thành giá trị hơn mười lời mời chào.",
+    "Hẹn lịch hôm nay – giữ khách cả năm.",
+    "Phong độ là nhất thời, kỷ luật mới là mãi mãi.",
+    "Mỗi ngày tốt hơn 1%, cuối tháng sẽ bứt phá bất ngờ.",
+    "Khách nhớ người làm mình đẹp lên – hãy là người đó.",
+    "Đội mạnh không phải vì có một ngôi sao, mà vì ai cũng tỏa sáng.",
+    "Làm hết sức, cười hết mình – khách luôn cảm nhận được.",
+    "Thu nhập tăng khi giá trị mình mang lại cho khách tăng.",
+    "Chăm chút từng chi tiết – đó là chữ ký của người thợ giỏi.",
+    "Hôm qua là kinh nghiệm, hôm nay là cơ hội.",
+    "Đi một mình thì nhanh, đi cùng nhau thì xa."
+  ];
+  const PRAISE = [
+    "Quá đỉnh! Tiếp tục giữ lửa nhé 🔥",
+    "Phong độ ngôi sao – cả team tự hào về bạn!",
+    "Bứt phá ấn tượng – cảm ơn bạn đã cháy hết mình 💪",
+    "Đây là chuẩn mực cho cả đội – xuất sắc!",
+    "Khách hài lòng, doanh thu tăng – tuyệt vời!",
+    "Làm tốt lắm! Ngày mai mình cùng giữ phong độ này nhé ⭐"
+  ];
+  const hash = s => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+
+  // ===== Hàm định dạng =====
+  const tr = v => {
+    if (!v) return "0";
+    if (v >= 1e6) return (v / 1e6).toLocaleString("vi-VN", { maximumFractionDigits: v < 1e7 ? 2 : 1 }) + " tr";
+    return Math.round(v / 1e3).toLocaleString("vi-VN") + "k";
+  };
+  const full = v => Math.round(v || 0).toLocaleString("vi-VN") + " đ";
+  const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+  const dm = iso => iso.slice(8, 10) + "/" + iso.slice(5, 7);
+  const kyText = (f, t) => f === t ? "Ngày " + dm(f) : dm(f) + " – " + dm(t);
+  const dot = s => `<span class="dot" style="background:${COLOR[s]}"></span>`;
+  const salonTag = s => `<span class="tagS">${dot(s)}${D.salons[s]}</span>`;
+  const initials = ten => ten.split(" ").slice(-2).map(w => w[0]).join("").toUpperCase();
+  const av = (ten, s, lg) => `<span class="av${lg ? " lg" : ""}" style="background:${COLOR[s]}">${initials(ten)}</span>`;
+  const salonsOn = () => st.salon === "all" ? ["872", "411"] : [st.salon];
+  const MEDAL = ["🥇", "🥈", "🥉"];
+
+  // ===== Cộng dồn số liệu trong khoảng ngày =====
+  function gom(from, to) {
+    const days = NGAY.filter(d => d >= from && d <= to);
+    const tong = {}, nv = { stl: {}, skn: {}, sup: {} };
+    for (const d of days) {
+      const x = D.ngay[d];
+      for (const s in x.tong) {
+        const t = tong[s] || (tong[s] = { cat: 0, spa: 0, und: 0, mp: 0, kh: 0, moi: 0 });
+        const [cat, spa, und, mp, kh, moi] = x.tong[s];
+        t.cat += cat; t.spa += spa; t.und += und; t.mp += mp; t.kh += kh; t.moi += moi;
+      }
+      for (const bp of ["stl", "skn", "sup"]) for (const [s, ten, dv, kh, ups, undg, mp] of x[bp] || []) {
+        const k = s + "|" + ten;
+        const o = nv[bp][k] || (nv[bp][k] = { s, ten, dv: 0, kh: 0, ups: 0, und: 0, mp: 0, ngay: 0 });
+        o.dv += dv; o.kh += kh; o.ups += ups; o.und += undg; o.mp += mp; o.ngay++;
+      }
+    }
+    for (const bp in nv) nv[bp] = Object.values(nv[bp]);
+    return { days, tong, nv };
+  }
+  function gomHen(from, to) {
+    const m = {};
+    for (const d of NGAY_HEN.filter(d => d >= from && d <= to)) for (const [s, ten, nhan, hen, kc] of D.hen[d]) {
+      const o = m[s + "|" + ten] || (m[s + "|" + ten] = { s, ten, nhan: 0, hen: 0, kcSum: 0 });
+      o.nhan += nhan; o.hen += hen; o.kcSum += (kc || 0) * hen;
+    }
+    return Object.values(m);
+  }
+  const diem = (bp, o) => bp === "sup" ? o.ups : o.dv;   // Sup xếp theo DV upsale
+
+  // ===== Banner: câu nói + nhịp ngày mới nhất =====
+  function renderHero() {
+    document.getElementById("quote").textContent = QUOTES[hash(last) % QUOTES.length];
+    const g = gom(last, last), on = salonsOn();
+    let dt = 0, kh = 0, mp = 0;
+    for (const s of on) { const t = g.tong[s]; if (t) { dt += t.cat + t.spa + t.und + t.mp; kh += t.kh; mp += t.mp; } }
+    document.getElementById("pulse").innerHTML =
+      `<div><small>Doanh thu ${dm(last)}</small><b>${tr(dt)}</b></div>
+       <div><small>Lượt khách</small><b>${kh}</b></div>
+       <div><small>Mỹ phẩm</small><b>${tr(mp)}</b></div>`;
+    document.getElementById("upd").textContent =
+      `Cập nhật ${D.capNhat} · doanh thu đến ${dm(last)} · hẹn lịch đến ${dm(lastHen)}`;
+    document.getElementById("closerT").textContent =
+      st.salon === "all" ? "872 & 411 – cùng nhau bứt phá tháng " + (+last.slice(5, 7)) + "! 🚀" : D.salons[st.salon] + " – cùng nhau bứt phá! 🚀";
+  }
+
+  // ===== 1. Ngôi sao ngày mới nhất =====
+  function renderTuyenDuong() {
+    document.getElementById("tdTitle").textContent = "🏆 Ngôi sao ngày " + dm(last);
+    document.getElementById("tdSub").textContent = "Vinh danh những bạn dẫn đầu doanh thu ngày " + dm(last) + ". Cảm ơn các bạn đã cháy hết mình!";
+    const g = gom(last, last), on = salonsOn();
+    const nhom = [["stl", "✂️ Stylist", "DT dịch vụ"], ["skn", "💆 Skinner", "DT dịch vụ"], ["sup", "🤝 Sup", "DV upsale"]];
+    const cards = nhom.map(([bp, title, unit]) => {
+      const top = g.nv[bp].filter(o => on.includes(o.s) && diem(bp, o) > 0)
+        .sort((a, b) => diem(bp, b) - diem(bp, a)).slice(0, 3);
+      return card(title, unit, top.map(o => ({ ...o, v: diem(bp, o), extra: o.kh + " khách" })));
+    });
+    const mp = ["stl", "skn", "sup"].flatMap(bp => g.nv[bp]).filter(o => on.includes(o.s) && o.mp > 0)
+      .sort((a, b) => b.mp - a.mp).slice(0, 3);
+    if (mp.length) cards.push(card("🧴 Bán mỹ phẩm", "DT mỹ phẩm", mp.map(o => ({ ...o, v: o.mp, extra: "" }))));
+    document.getElementById("td").innerHTML = cards.join("");
+
+    function card(title, unit, list) {
+      if (!list.length) return `<div class="card star"><span class="bp">${title}</span><div class="empty" style="margin-top:12px">Chưa có số liệu</div></div>`;
+      const [c, ...rest] = list;
+      return `<div class="card star"><span class="crown">👑</span><span class="bp">${title}</span>
+        <div class="champ">${av(c.ten, c.s, true)}
+          <div><div class="n">${c.ten}</div>${salonTag(c.s)}${c.extra ? ` <span class="tagS">· ${c.extra}</span>` : ""}</div>
+          <div class="v" data-tip="${full(c.v)}">${tr(c.v)}<small>${unit}</small></div></div>
+        <div class="praise">${PRAISE[hash(c.ten + last) % PRAISE.length]}</div>
+        ${rest.length ? `<ul class="runner">${rest.map((o, i) => `<li><span class="m">${MEDAL[i + 1]}</span>${o.ten}
+          <span class="tagS">${dot(o.s)}</span><span class="v">${tr(o.v)}</span></li>`).join("")}</ul>` : ""}
+      </div>`;
+    }
+  }
+
+  // ===== 2. Nhắc stylist chưa hẹn lịch đủ 100% =====
+  function renderCanhBao() {
+    document.getElementById("cbTitle").textContent = "⏰ Nhắc hẹn lịch – ngày " + dm(lastHen);
+    const on = salonsOn();
+    const ds = (D.hen[lastHen] || []).filter(r => on.includes(r[0]) && r[2] > 0);
+    const thieu = ds.filter(r => r[3] < r[2]).sort((a, b) => (b[2] - b[3]) - (a[2] - a[3]));
+    const du = ds.filter(r => r[3] >= r[2]);
+    const MSG = ["Hôm nay mình hẹn đủ 100% nhé!", "Nhớ hẹn lịch trước khi khách ra về nha!",
+      "Chỉ cần 1 câu: \"Anh hẹn lịch cắt lần sau luôn nhé?\"", "Mỗi lịch hẹn là 1 khách quay lại chắc chắn!"];
+    // Tổng từng salon: hẹn / phục vụ
+    const tongSalon = on.map(s => {
+      const x = ds.filter(r => r[0] === s); if (!x.length) return "";
+      const n = x.reduce((a, r) => a + r[2], 0), h = x.reduce((a, r) => a + r[3], 0);
+      return `<span>${dot(s)} ${D.salons[s]}: hẹn <b>${h}</b>/<b>${n}</b> khách phục vụ (<b>${pct(h, n)}%</b>)</span>`;
+    }).filter(Boolean).join("");
+    document.getElementById("cb").innerHTML = thieu.length
+      ? `<div class="rsum">${tongSalon}</div>
+        <p class="lead">💡 Hẹn lịch không phải là bán hàng – đó là giữ khách quen cho chính mình.</p>` +
+        thieu.map(([s, ten, nhan, hen]) => `
+        <div class="rrow">${av(ten, s)}
+          <div><div class="n">${ten} ${salonTag(s)}</div>
+            <div class="stat">📅 Đã hẹn <b>${hen}</b> / <b>${nhan}</b> khách phục vụ · <b>${pct(hen, nhan)}%</b></div>
+            <div class="mini"><i style="width:${pct(hen, nhan)}%"></i></div>
+            <div class="msg">${MSG[hash(ten + lastHen) % MSG.length]}</div></div>
+          <div class="cnt"><b>${nhan - hen}</b><small>khách chưa hẹn</small></div></div>`).join("")
+        + (du.length ? `<div class="done">✅ Đã hẹn đủ 100%: ${du.map(r => `${r[1]} (${r[3]}/${r[2]})`).join(", ")} – tuyệt vời!</div>` : "")
+      : `${tongSalon ? `<div class="rsum">${tongSalon}</div>` : ""}<div class="okbox">🎉 Tất cả stylist đã hẹn lịch 100% khách. Quá xuất sắc!</div>`;
+  }
+
+  // ===== 3. Tổng quan salon =====
+  function renderTong(g) {
+    document.getElementById("subTong").textContent = kyText(st.from, st.to) + ` · ${g.days.length} ngày có số liệu`;
+    document.getElementById("tong").innerHTML = salonsOn().map(s => {
+      const t = g.tong[s] || { cat: 0, spa: 0, und: 0, mp: 0, kh: 0, moi: 0 };
+      const dv = t.cat + t.spa + t.und, all = dv + t.mp;
+      const mix = [["✂️ Cắt/SC", t.cat], ["💆 Relax/Spa", t.spa], ["🎨 Uốn/Nhuộm/Dưỡng", t.und], ["🧴 Mỹ phẩm", t.mp]];
+      return `<div class="card sal" style="--c:${COLOR[s]}">
+        <div class="h"><span class="nm">${dot(s)}${D.salons[s]}</span></div>
+        <div class="big" data-tip="${full(all)}">${tr(all)} <small>tổng doanh thu</small></div>
+        <div class="kv">
+          <div>DT dịch vụ<b data-tip="${full(dv)}">${tr(dv)}</b></div>
+          <div>DT mỹ phẩm<b class="mp" data-tip="${full(t.mp)}">${tr(t.mp)}</b></div>
+          <div>Lượt khách<b>${t.kh}</b></div>
+          <div>KH mới<b>${t.moi}</b></div>
+          <div>DT/khách<b>${tr(t.kh ? all / t.kh : 0)}</b></div>
+          <div>DT/ngày<b>${tr(g.days.length ? all / g.days.length : 0)}</b></div>
+        </div>
+        ${mix.map(([n, v]) => `<div class="mixrow" data-tip="${n}: ${full(v)} (${pct(v, all)}%)">
+          <span class="lab">${n}</span><span class="track"><i style="width:${pct(v, all)}%"></i></span>
+          <span class="val">${tr(v)}</span></div>`).join("")}
+      </div>`;
+    }).join("");
+  }
+
+  // ===== 4. Xếp hạng theo bộ phận =====
+  function renderNv(g) {
+    document.getElementById("subNv").textContent = kyText(st.from, st.to) + " · xếp theo doanh thu dịch vụ";
+    const on = salonsOn(), bp = st.bp, isSup = bp === "sup";
+    document.getElementById("lg").innerHTML = st.salon === "all" ? on.map(s => `<span>${dot(s)}${D.salons[s]}</span>`).join("") : "";
+    const rows = g.nv[bp].filter(o => on.includes(o.s)).sort((a, b) => diem(bp, b) - diem(bp, a));
+    const max = Math.max(1, ...rows.map(o => diem(bp, o)));
+    const sum = k => rows.reduce((a, o) => a + o[k], 0);
+    document.getElementById("dsum").innerHTML = rows.length ? `
+      <span>${isSup ? "DV upsale" : "DT dịch vụ"}: <b>${tr(sum(isSup ? "ups" : "dv"))}</b></span>
+      <span>Mỹ phẩm: <b class="mp">${tr(sum("mp"))}</b></span>
+      <span>Khách phục vụ: <b>${sum("kh")}</b></span>
+      <span>Nhân sự: <b>${rows.length}</b></span>` : "";
+    document.getElementById("rank").innerHTML = rows.length ? rows.map((o, i) => {
+      const v = diem(bp, o);
+      return `<li><span class="no ${i < 3 ? "m" + (i + 1) : ""}">${i < 3 ? MEDAL[i] : i + 1}</span>${av(o.ten, o.s)}<div>
+        <div class="who"><span><span class="n">${o.ten}</span> ${salonTag(o.s)}</span>
+          <span class="v" data-tip="${full(v)}">${tr(v)}</span></div>
+        <div class="rbar" data-tip="${o.ten}: ${full(v)}"><i style="width:${v / max * 100}%;background:${COLOR[o.s]}"></i></div>
+        <div class="meta">
+          ${isSup ? `<span>DV phục vụ <b>${tr(o.dv)}</b></span>` : ""}
+          <span>Khách <b>${o.kh}</b></span>
+          <span>DT/khách <b>${tr(o.kh ? o.dv / o.kh : 0)}</b></span>
+          ${isSup ? "" : `<span>Upsale <b>${tr(o.ups)}</b></span>`}
+          ${bp === "stl" ? `<span>%UND <b>${pct(o.und, o.kh)}%</b></span>` : ""}
+          <span>MP <b class="mp">${tr(o.mp)}</b></span>
+          ${g.days.length > 1 ? `<span>Ngày làm <b>${o.ngay}</b></span>` : ""}
+        </div></div></li>`;
+    }).join("") : `<li><span></span><span></span><div class="empty">Chưa có số liệu trong kỳ này.</div></li>`;
+    document.getElementById("bpNote").textContent = isSup
+      ? "Sup xếp theo doanh thu dịch vụ upsale (tư vấn khách làm thêm dịch vụ)."
+      : "Upsale = doanh thu dịch vụ tư vấn thêm." + (bp === "stl" ? " %UND = số gói Uốn/Nhuộm/Dưỡng / lượt khách." : "");
+  }
+
+  // ===== 5. Hẹn lịch theo kỳ =====
+  function renderHen() {
+    const on = salonsOn(), all = gomHen(st.from, st.to);
+    const rows = all.filter(o => on.includes(o.s) && o.nhan > 0).map(o => ({ ...o, p: o.hen / o.nhan * 100 }))
+      .sort((a, b) => b.p - a.p || b.nhan - a.nhan);
+    const tot = on.map(s => {
+      const x = all.filter(o => o.s === s), n = x.reduce((a, o) => a + o.nhan, 0), m = x.reduce((a, o) => a + o.hen, 0);
+      return `${D.salons[s]}: ${pct(m, n)}% (${m}/${n})`;
+    }).join(" · ");
+    const den = st.to > lastHen ? lastHen : st.to;
+    document.getElementById("subHen").textContent = (st.from > lastHen ? "Chưa có số liệu hẹn lịch cho kỳ này"
+      : kyText(st.from, den) + " · " + tot) + (st.to > lastHen ? ` (số liệu hẹn lịch mới có đến ${dm(lastHen)})` : "");
+    const nhom = p => p >= 50 ? ["Hẹn tốt", "var(--good)"] : p >= 30 ? ["Hẹn khá", "var(--warn)"]
+      : p > 0 ? ["Hẹn ít", "var(--serious)"] : ["Chưa hẹn", "var(--crit)"];
+    document.getElementById("henList").innerHTML = rows.length ? rows.map((o, i) => {
+      const [lab, c] = nhom(o.p);
+      return `<li><span class="no">${i + 1}</span>${av(o.ten, o.s)}<div>
+        <div class="who"><span><span class="n">${o.ten}</span> ${salonTag(o.s)}</span><span class="v">${Math.round(o.p)}%</span></div>
+        <div class="hen" data-tip="${o.ten}: hẹn ${o.hen}/${o.nhan} khách"><i style="width:${o.p}%;background:${COLOR[o.s]}"></i><span class="goal"></span></div>
+        <div class="meta"><span class="tag" style="--c:${c}">${lab}</span><span>Hẹn <b>${o.hen}</b>/${o.nhan} khách</span>
+          ${o.hen ? `<span>Hẹn sau TB <b>${Math.round(o.kcSum / o.hen)} ngày</b></span>` : ""}</div>
+      </div></li>`;
+    }).join("") : `<li><span></span><span></span><div class="empty">Chưa có số liệu.</div></li>`;
+  }
+
+  // ===== Bộ lọc =====
+  const $from = document.getElementById("dFrom"), $to = document.getElementById("dTo");
+  $from.min = $to.min = NGAY[0]; $from.max = $to.max = last;
+  function setQuick(q) {
+    st.quick = q;
+    if (q === "d1") { st.from = st.to = last; }
+    if (q === "d7") { st.to = last; st.from = NGAY[Math.max(0, NGAY.length - 7)]; }
+    if (q === "mtd") { st.to = last; st.from = last.slice(0, 8) + "01"; }
+  }
+  function paint() {
+    document.querySelectorAll("#fSalon button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === st.salon));
+    document.querySelectorAll("#fBp button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === st.bp));
+    document.querySelectorAll("#fQuick button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === st.quick));
+    $from.value = st.from; $to.value = st.to;
+  }
+  function renderAll() {
+    paint();
+    const g = gom(st.from, st.to);
+    renderHero(); renderTuyenDuong(); renderCanhBao(); renderTong(g); renderNv(g); renderHen();
+  }
+  const on = (id, fn) => document.getElementById(id).addEventListener("click", e => {
+    const b = e.target.closest("button"); if (b) { fn(b.dataset.v); renderAll(); }
+  });
+  on("fSalon", v => { st.salon = v; try { localStorage.setItem("bsl_salon", v); } catch (_) {} });
+  on("fBp", v => { st.bp = v; });
+  on("fQuick", v => setQuick(v));
+  [$from, $to].forEach(el => el.addEventListener("change", () => {
+    if (!$from.value || !$to.value) return;
+    st.from = $from.value; st.to = $to.value;
+    if (st.from > st.to) [st.from, st.to] = [st.to, st.from];
+    st.quick = ""; renderAll();
+  }));
+
+  // Tooltip khi rê chuột / chạm
+  const tip = document.getElementById("tip");
+  document.addEventListener("pointermove", e => {
+    const t = e.target.closest("[data-tip]");
+    if (!t) { tip.style.opacity = 0; return; }
+    tip.textContent = t.dataset.tip; tip.style.opacity = 1;
+    tip.style.left = Math.min(e.clientX + 12, innerWidth - tip.offsetWidth - 8) + "px";
+    tip.style.top = (e.clientY + 14) + "px";
+  });
+
+  try { const v = localStorage.getItem("bsl_salon"); if (v === "872" || v === "411" || v === "all") st.salon = v; } catch (_) {}
+  renderAll();
+</script>
+</body>
+</html>
