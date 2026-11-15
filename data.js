@@ -32,5 +32,21 @@ window.DATA = {
     "2026-11-11": [["872","Đặng Phúc Vinh",6,0,null],["872","Trần Văn Lộc",10,0,null],["411","Đoàn Tấn Đạt",5,4,23],["411","Lê Hoàng Phúc",3,1,32],["411","Lê Trần Hữu Minh",5,0,null]],
     "2026-11-12": [["872","Trần Văn Lộc",5,0,null],["872","Trần Nguyễn Kỳ Nam",6,0,null],["872","Đặng Phúc Vinh",1,0,null],["411","Lê Hoàng Phúc",4,4,31],["411","Đoàn Tấn Đạt",3,2,39],["411","Lê Trần Hữu Minh",3,0,null]],
     "2026-11-13": [["872","Đặng Phúc Vinh",1,0,null],["872","Trần Văn Lộc",3,0,null],["872","Trần Nguyễn Kỳ Nam",3,0,null],["411","Lê Hoàng Phúc",1,0,null],["411","Đoàn Tấn Đạt",1,0,null]]
+  },
+  "book": {
+    "2026-11-01": [["411","stl","Đoàn Tấn Đạt",2,15],["872","stl","Đặng Phúc Vinh",1,6],["872","stl","Chu Ngọc Vinh",1,6],["872","stl","Trần Nguyễn Kỳ Nam",1,12],["411","stl","Nguyễn Văn Nam",1,13]],
+    "2026-11-02": [["872","stl","Trần Nguyễn Kỳ Nam",1,7]],
+    "2026-11-03": [["411","stl","Đoàn Tấn Đạt",3,7],["411","stl","Nguyễn Văn Nam",2,6],["872","stl","Đặng Phúc Vinh",1,2]],
+    "2026-11-04": [["411","stl","Đoàn Tấn Đạt",1,5]],
+    "2026-11-05": [["411","skn","Nguyễn Thị Loan",1,4]],
+    "2026-11-06": [["872","stl","Đặng Phúc Vinh",2,9],["872","stl","Trần Nguyễn Kỳ Nam",2,12],["411","stl","Nguyễn Văn Nam",1,0],["411","stl","Lê Hoàng Phúc",1,6]],
+    "2026-11-07": [["872","stl","Chu Ngọc Vinh",1,0],["872","stl","Trần Nguyễn Kỳ Nam",1,15],["411","stl","Đoàn Tấn Đạt",1,7]],
+    "2026-11-08": [["411","stl","Đoàn Tấn Đạt",2,12],["872","stl","Đặng Phúc Vinh",1,6],["411","stl","Nguyễn Văn Nam",1,0],["411","skn","Vy Khánh Diễm",2,0],["872","skn","Nguyễn Thanh Vy",1,2],["411","skn","Nguyễn Thị Lan Trinh",1,16]],
+    "2026-11-09": [["411","stl","Đoàn Tấn Đạt",1,5],["411","skn","Nguyễn Thị Lan Trinh",1,8]],
+    "2026-11-10": [["872","stl","Đặng Phúc Vinh",1,7],["411","stl","Nguyễn Văn Nam",1,0],["411","skn","Vy Khánh Diễm",1,0]],
+    "2026-11-11": [["411","skn","Nguyễn Thị Loan",1,3]],
+    "2026-11-12": [["872","skn","Nguyễn Thanh Vy",2,0]],
+    "2026-11-13": [["872","stl","Đặng Phúc Vinh",1,1],["872","skn","Nguyễn Thanh Vy",1,0]],
+    "2026-11-14": [["872","stl","Chu Ngọc Vinh",2,8],["411","stl","Đoàn Tấn Đạt",2,6],["411","stl","Lê Trần Hữu Minh",1,5],["411","skn","Nguyễn Thị Lan Trinh",1,8]]
   }
 };

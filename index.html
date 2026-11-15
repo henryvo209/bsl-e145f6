@@ -170,6 +170,10 @@
   .tag::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--muted)); }
   .empty { color: var(--muted); font-size: 14px; padding: 6px 0; }
 
+  /* Khách book thợ */
+  .ctitle { font-weight: 700; font-size: 15px; margin: 0 0 4px; }
+  .ctitle small { font-weight: 500; color: var(--muted); font-size: 12.5px; margin-left: 6px; }
+
   .closer { margin-top: 30px; text-align: center; padding: 20px 16px; border-radius: 18px;
     background: linear-gradient(135deg, var(--hero1), var(--hero3)); color: #fff; }
   .closer b { display: block; font-size: 17px; margin-bottom: 4px; }
@@ -255,8 +259,16 @@
     </div>
   </section>
 
+  <!-- ===== 6. Khách book thợ ===== -->
+  <section class="sec">
+    <div class="sec-h"><h2>💈 Khách book thợ</h2></div>
+    <p class="sub" id="subBook"></p>
+    <div class="grid2" id="book"></div>
+    <p class="note">Khách book = khách đặt lịch chọn đích danh bạn. Khách quen càng nhiều, thu nhập càng ổn định. · % = lượt book / khách mình phục vụ.</p>
+  </section>
+
   <div class="closer"><b id="closerT"></b><span>Mỗi khách hài lòng hôm nay là nền móng cho thu nhập ngày mai.</span></div>
-  <footer>Nguồn: báo cáo 30Shine (0019 kết quả kinh doanh, 0035 hẹn lịch stylist) · DV = dịch vụ · MP = mỹ phẩm</footer>
+  <footer>Nguồn: báo cáo 30Shine (0019 kết quả kinh doanh, 0035 hẹn lịch stylist, 0029 khách book) · DV = dịch vụ · MP = mỹ phẩm</footer>
 </div>
 <div id="tip"></div>
 
@@ -265,6 +277,8 @@
   const D = window.DATA;
   const COLOR = { "872": "var(--s872)", "411": "var(--s411)" };
   const NGAY = Object.keys(D.ngay).sort(), NGAY_HEN = Object.keys(D.hen).sort();
+  D.book = D.book || {};
+  const NGAY_BOOK = Object.keys(D.book).sort();
   const last = NGAY[NGAY.length - 1], lastHen = NGAY_HEN[NGAY_HEN.length - 1];
   const st = { salon: "all", bp: "stl", from: last, to: last, quick: "d1" };
 
@@ -339,6 +353,18 @@
       o.nhan += nhan; o.hen += hen; o.kcSum += (kc || 0) * hen;
     }
     return Object.values(m);
+  }
+  // Khách book thợ: lượt book (0029) + khách phục vụ (0019) trong những ngày có số book
+  function gomBook(from, to) {
+    const days = NGAY_BOOK.filter(d => d >= from && d <= to), m = {}, salon = {};
+    const get = (s, bp, ten) => m[s + "|" + bp + "|" + ten] || (m[s + "|" + bp + "|" + ten] = { s, bp, ten, book: 0, kh: 0 });
+    for (const d of days) {
+      for (const [s, bp, ten, b] of D.book[d]) get(s, bp, ten).book += b;
+      const x = D.ngay[d]; if (!x) continue;
+      for (const bp of ["stl", "skn"]) for (const r of x[bp] || []) if (r[3] > 0) get(r[0], bp, r[1]).kh += r[3];
+      for (const s in x.tong) salon[s] = (salon[s] || 0) + x.tong[s][4];
+    }
+    return { days, list: Object.values(m), salon };
   }
   const diem = (bp, o) => bp === "sup" ? o.ups : o.dv;   // Sup xếp theo DV upsale
 
@@ -449,6 +475,7 @@
     document.getElementById("lg").innerHTML = st.salon === "all" ? on.map(s => `<span>${dot(s)}${D.salons[s]}</span>`).join("") : "";
     const rows = g.nv[bp].filter(o => on.includes(o.s)).sort((a, b) => diem(bp, b) - diem(bp, a));
     const max = Math.max(1, ...rows.map(o => diem(bp, o)));
+    const bk = {}; for (const o of gomBook(st.from, st.to).list) if (o.bp === bp) bk[o.s + "|" + o.ten] = o.book;
     const sum = k => rows.reduce((a, o) => a + o[k], 0);
     document.getElementById("dsum").innerHTML = rows.length ? `
       <span>${isSup ? "DV upsale" : "DT dịch vụ"}: <b>${tr(sum(isSup ? "ups" : "dv"))}</b></span>
@@ -467,6 +494,7 @@
           <span>DT/khách <b>${tr(o.kh ? o.dv / o.kh : 0)}</b></span>
           ${isSup ? "" : `<span>Upsale <b>${tr(o.ups)}</b></span>`}
           ${bp === "stl" ? `<span>%UND <b>${pct(o.und, o.kh)}%</b></span>` : ""}
+          ${!isSup && NGAY_BOOK.length ? `<span>Khách book <b>${bk[o.s + "|" + o.ten] || 0}</b></span>` : ""}
           <span>MP <b class="mp">${tr(o.mp)}</b></span>
           ${g.days.length > 1 ? `<span>Ngày làm <b>${o.ngay}</b></span>` : ""}
         </div></div></li>`;
@@ -501,6 +529,31 @@
     }).join("") : `<li><span></span><span></span><div class="empty">Chưa có số liệu.</div></li>`;
   }
 
+  // ===== 6. Khách book thợ =====
+  function renderBook() {
+    const on = salonsOn(), g = gomBook(st.from, st.to);
+    const rows = g.list.filter(o => on.includes(o.s) && (o.book > 0 || o.kh > 0));
+    const tot = on.map(s => {
+      const b = rows.filter(o => o.s === s && o.bp === "stl").reduce((a, o) => a + o.book, 0), kh = g.salon[s] || 0;
+      return `${D.salons[s]}: ${b} lượt book stylist / ${kh} khách (${pct(b, kh)}%)`;
+    }).join(" · ");
+    document.getElementById("subBook").textContent = g.days.length ? kyText(st.from, st.to) + " · " + tot : "Chưa có số liệu khách book cho kỳ này.";
+    const card = (bp, title) => {
+      const x = rows.filter(o => o.bp === bp).sort((a, b) => b.book - a.book || (b.kh ? b.book / b.kh : 0) - (a.kh ? a.book / a.kh : 0) || b.kh - a.kh);
+      const max = Math.max(1, ...x.map(o => o.book)), sb = x.reduce((a, o) => a + o.book, 0);
+      return `<div class="card"><div class="ctitle">${title}<small>${sb} lượt book</small></div><ol class="rank">${x.length ? x.map((o, i) => {
+        const p = o.kh ? Math.round(o.book / o.kh * 100) : null, top = o.book > 0 && i < 3;
+        return `<li><span class="no ${top ? "m" + (i + 1) : ""}">${top ? MEDAL[i] : i + 1}</span>${av(o.ten, o.s)}<div>
+          <div class="who"><span><span class="n">${o.ten}</span> ${salonTag(o.s)}</span><span class="v">${o.book} <small style="font-weight:500;color:var(--muted)">book</small></span></div>
+          <div class="rbar" data-tip="${o.ten}: ${o.book} lượt book"><i style="width:${o.book / max * 100}%;background:${COLOR[o.s]}"></i></div>
+          <div class="meta">${o.book ? `<span>Khách phục vụ <b>${o.kh}</b></span>${p !== null ? `<span>Tỷ lệ book <b>${p}%</b></span>` : ""}`
+            : `<span class="tag" style="--c:var(--warn)">Chưa có khách book</span><span>Khách phục vụ <b>${o.kh}</b></span>`}</div>
+        </div></li>`;
+      }).join("") : `<li><span></span><span></span><div class="empty">Chưa có số liệu.</div></li>`}</ol></div>`;
+    };
+    document.getElementById("book").innerHTML = g.days.length ? card("stl", "✂️ Stylist") + card("skn", "💆 Skinner") : "";
+  }
+
   // ===== Bộ lọc =====
   const $from = document.getElementById("dFrom"), $to = document.getElementById("dTo");
   $from.min = $to.min = NGAY[0]; $from.max = $to.max = last;
@@ -519,7 +572,7 @@
   function renderAll() {
     paint();
     const g = gom(st.from, st.to);
-    renderHero(); renderTuyenDuong(); renderCanhBao(); renderTong(g); renderNv(g); renderHen();
+    renderHero(); renderTuyenDuong(); renderCanhBao(); renderTong(g); renderNv(g); renderHen(); renderBook();
   }
   const on = (id, fn) => document.getElementById(id).addEventListener("click", e => {
     const b = e.target.closest("button"); if (b) { fn(b.dataset.v); renderAll(); }
