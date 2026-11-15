@@ -234,7 +234,7 @@
 
   <!-- ===== 4. Xếp hạng bộ phận ===== -->
   <section class="sec">
-    <div class="sec-h"><h2>🏅 Bảng xếp hạng</h2></div>
+    <div class="sec-h"><h2 id="nvTitle">🏅 Bảng xếp hạng</h2></div>
     <p class="sub" id="subNv"></p>
     <div class="tabs" id="fBp">
       <button data-v="stl">✂️ Stylist</button>
@@ -468,40 +468,64 @@
     }).join("");
   }
 
-  // ===== 4. Xếp hạng theo bộ phận =====
-  function renderNv(g) {
-    document.getElementById("subNv").textContent = kyText(st.from, st.to) + " · xếp theo doanh thu dịch vụ";
+  // ===== 4. Xếp hạng runrate tháng theo mục tiêu =====
+  // Mục tiêu mỗi người (đồng, tính trên DT dịch vụ + mỹ phẩm). Tháng chưa đặt → dùng tháng gần nhất trước đó.
+  function mucTieu(thang) {
+    const MT = D.mucTieu || {}, ks = Object.keys(MT).sort();
+    const k = ks.filter(m => m <= thang).pop() || ks[0];
+    return k ? MT[k] : {};
+  }
+  function renderNv() {
     const on = salonsOn(), bp = st.bp, isSup = bp === "sup";
-    document.getElementById("lg").innerHTML = st.salon === "all" ? on.map(s => `<span>${dot(s)}${D.salons[s]}</span>`).join("") : "";
-    const rows = g.nv[bp].filter(o => on.includes(o.s)).sort((a, b) => diem(bp, b) - diem(bp, a));
-    const max = Math.max(1, ...rows.map(o => diem(bp, o)));
-    const bk = {}; for (const o of gomBook(st.from, st.to).list) if (o.bp === bp) bk[o.s + "|" + o.ten] = o.book;
+    // Luôn tính lũy kế từ ngày 1 của tháng đến ngày báo cáo (ngày "đến" của bộ lọc)
+    const den = st.to, thang = den.slice(0, 7), tu = thang + "-01";
+    const g = gom(tu, den), soNgay = g.days.length;
+    const ngayThang = new Date(+den.slice(0, 4), +den.slice(5, 7), 0).getDate(), conLai = ngayThang - +den.slice(8, 10);
+    const mt = mucTieu(thang)[bp] || 0;
+    const rows = g.nv[bp].filter(o => on.includes(o.s) && (o.kh > 0 || o.dv + o.mp > 0)).map(o => {
+      const lk = o.dv + o.mp, rr = soNgay ? lk / soNgay * ngayThang : 0;
+      return { ...o, lk, rr, p: mt ? rr / mt * 100 : 0 };
+    }).sort((a, b) => b.rr - a.rr);
+    const bk = {}; for (const o of gomBook(tu, den).list) if (o.bp === bp) bk[o.s + "|" + o.ten] = o.book;
     const sum = k => rows.reduce((a, o) => a + o[k], 0);
+
+    document.getElementById("nvTitle").textContent = `🏅 Xếp hạng runrate tháng ${+den.slice(5, 7)}`;
+    document.getElementById("subNv").textContent = `Lũy kế ${dm(tu)} – ${dm(den)} (${soNgay} ngày báo cáo / ${ngayThang} ngày) · ` +
+      (mt ? `Mục tiêu ${tr(mt)}/người (DV + MP)` : "Chưa đặt mục tiêu tháng này");
+    document.getElementById("lg").innerHTML = st.salon === "all" ? on.map(s => `<span>${dot(s)}${D.salons[s]}</span>`).join("") : "";
     document.getElementById("dsum").innerHTML = rows.length ? `
-      <span>${isSup ? "DV upsale" : "DT dịch vụ"}: <b>${tr(sum(isSup ? "ups" : "dv"))}</b></span>
-      <span>Mỹ phẩm: <b class="mp">${tr(sum("mp"))}</b></span>
+      <span>Lũy kế bộ phận: <b>${tr(sum("lk"))}</b></span>
+      <span>Runrate: <b>${tr(sum("rr"))}</b>${mt ? ` / MT ${tr(mt * rows.length)} (<b>${pct(sum("rr"), mt * rows.length)}%</b>)` : ""}</span>
       <span>Khách phục vụ: <b>${sum("kh")}</b></span>
       <span>Nhân sự: <b>${rows.length}</b></span>` : "";
+    const nhom = p => p >= 100 ? ["Vượt mục tiêu", "var(--good)"] : p >= 80 ? ["Sát mục tiêu", "var(--warn)"] : ["Cần tăng tốc", "var(--serious)"];
     document.getElementById("rank").innerHTML = rows.length ? rows.map((o, i) => {
-      const v = diem(bp, o);
+      const [lab, c] = nhom(o.p), can = Math.max(0, mt - o.lk);
       return `<li><span class="no ${i < 3 ? "m" + (i + 1) : ""}">${i < 3 ? MEDAL[i] : i + 1}</span>${av(o.ten, o.s)}<div>
         <div class="who"><span><span class="n">${o.ten}</span> ${salonTag(o.s)}</span>
-          <span class="v" data-tip="${full(v)}">${tr(v)}</span></div>
-        <div class="rbar" data-tip="${o.ten}: ${full(v)}"><i style="width:${v / max * 100}%;background:${COLOR[o.s]}"></i></div>
+          <span class="v" data-tip="Runrate ${full(o.rr)}">${mt ? Math.round(o.p) + "%" : tr(o.rr)}</span></div>
+        <div class="hen" data-tip="${o.ten}: runrate ${tr(o.rr)}${mt ? " / mục tiêu " + tr(mt) : ""}">
+          <i style="width:${mt ? Math.min(o.p, 125) / 1.25 : 0}%;background:${COLOR[o.s]}"></i>${mt ? `<span class="goal" style="left:80%"></span>` : ""}</div>
         <div class="meta">
-          ${isSup ? `<span>DV phục vụ <b>${tr(o.dv)}</b></span>` : ""}
+          ${mt ? `<span class="tag" style="--c:${c}">${lab}</span>` : ""}
+          <span>Lũy kế <b data-tip="${full(o.lk)}">${tr(o.lk)}</b>${mt ? ` (${pct(o.lk, mt)}% MT)` : ""}</span>
+          <span>Runrate <b>${tr(o.rr)}</b></span>
+          ${mt && can > 0 && conLai > 0 ? `<span>Cần <b>${tr(can / conLai)}</b>/ngày</span>` : ""}
+        </div>
+        <div class="meta">
+          <span>DV <b>${tr(o.dv)}</b></span>
+          <span>MP <b class="mp">${tr(o.mp)}</b></span>
           <span>Khách <b>${o.kh}</b></span>
           <span>DT/khách <b>${tr(o.kh ? o.dv / o.kh : 0)}</b></span>
-          ${isSup ? "" : `<span>Upsale <b>${tr(o.ups)}</b></span>`}
+          <span>${isSup ? "DV upsale" : "Upsale"} <b>${tr(o.ups)}</b></span>
           ${bp === "stl" ? `<span>%UND <b>${pct(o.und, o.kh)}%</b></span>` : ""}
           ${!isSup && NGAY_BOOK.length ? `<span>Khách book <b>${bk[o.s + "|" + o.ten] || 0}</b></span>` : ""}
-          <span>MP <b class="mp">${tr(o.mp)}</b></span>
-          ${g.days.length > 1 ? `<span>Ngày làm <b>${o.ngay}</b></span>` : ""}
+          <span>Ngày làm <b>${o.ngay}</b></span>
         </div></div></li>`;
-    }).join("") : `<li><span></span><span></span><div class="empty">Chưa có số liệu trong kỳ này.</div></li>`;
-    document.getElementById("bpNote").textContent = isSup
-      ? "Sup xếp theo doanh thu dịch vụ upsale (tư vấn khách làm thêm dịch vụ)."
-      : "Upsale = doanh thu dịch vụ tư vấn thêm." + (bp === "stl" ? " %UND = số gói Uốn/Nhuộm/Dưỡng / lượt khách." : "");
+    }).join("") : `<li><span></span><span></span><div class="empty">Chưa có số liệu tháng này.</div></li>`;
+    document.getElementById("bpNote").textContent =
+      "Runrate = lũy kế (DV + MP) ÷ số ngày báo cáo × số ngày trong tháng – dự kiến cuối tháng nếu giữ nhịp hiện tại. " +
+      "Vạch đứng = 100% mục tiêu. Vượt ≥100% · Sát 80–99% · Cần tăng tốc <80%. Bảng luôn tính từ ngày 1 đến ngày \"đến\" của bộ lọc.";
   }
 
   // ===== 5. Hẹn lịch theo kỳ =====
