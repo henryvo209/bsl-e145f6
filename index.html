@@ -174,6 +174,20 @@
   .ctitle { font-weight: 700; font-size: 15px; margin: 0 0 4px; }
   .ctitle small { font-weight: 500; color: var(--muted); font-size: 12.5px; margin-left: 6px; }
 
+  /* Khách đánh giá */
+  .stars { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .stars small { font-size: 13px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+  .stars .st { color: var(--gold); }
+  .dgh { font-size: 13px; font-weight: 700; margin: 14px 0 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 12.5px; background: var(--chip); color: var(--ink2); border-radius: 999px; padding: 3px 10px; }
+  .chip b { color: var(--ink); margin-left: 4px; }
+  .chip.gy { background: var(--warm-soft); box-shadow: inset 0 0 0 1px var(--warm-ring); }
+  .che { list-style: none; margin: 0; padding: 0; }
+  .che li { font-size: 13px; padding: 7px 0; border-top: 1px solid var(--grid); color: var(--ink); line-height: 1.45; }
+  .che li:first-child { border-top: 0; }
+  .che .src { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 2px; }
+
   .closer { margin-top: 30px; text-align: center; padding: 20px 16px; border-radius: 18px;
     background: linear-gradient(135deg, var(--hero1), var(--hero3)); color: #fff; }
   .closer b { display: block; font-size: 17px; margin-bottom: 4px; }
@@ -267,8 +281,20 @@
     <p class="note">Khách book = khách đặt lịch chọn đích danh bạn. Khách quen càng nhiều, thu nhập càng ổn định. · % = lượt book / khách mình phục vụ.</p>
   </section>
 
+  <!-- ===== 7. Khách đánh giá (khen / chê) ===== -->
+  <section class="sec">
+    <div class="sec-h"><h2>⭐ Khách đánh giá</h2></div>
+    <p class="sub" id="subDg"></p>
+    <div class="grid2" id="dgSalon"></div>
+    <div class="card" style="margin-top:12px">
+      <div class="ctitle">🙋 Theo nhân sự<small>số sao khách chấm cho từng bạn</small></div>
+      <ol class="rank" id="dgNv"></ol>
+    </div>
+    <p class="note">Theo ngày khách đánh giá. Điểm sao lấy từ app/Zalo; bill 1–3 sao tính mọi nguồn (tablet, Google, Zalo…). Lý do chê do CSKH cập nhật, có thể bổ sung sau 1–3 ngày.</p>
+  </section>
+
   <div class="closer"><b id="closerT"></b><span>Mỗi khách hài lòng hôm nay là nền móng cho thu nhập ngày mai.</span></div>
-  <footer>Nguồn: báo cáo 30Shine (0019 kết quả kinh doanh, 0035 hẹn lịch stylist, 0029 khách book) · DV = dịch vụ · MP = mỹ phẩm</footer>
+  <footer>Nguồn: báo cáo 30Shine (0019 kết quả kinh doanh, 0035 hẹn lịch stylist, 0029 khách book, 0005 đánh giá khách) · DV = dịch vụ · MP = mỹ phẩm</footer>
 </div>
 <div id="tip"></div>
 
@@ -578,6 +604,71 @@
     document.getElementById("book").innerHTML = g.days.length ? card("stl", "✂️ Stylist") + card("skn", "💆 Skinner") : "";
   }
 
+  // ===== 7. Khách đánh giá (báo cáo 0005) =====
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const saoTB = (t, l) => l ? (t / l).toLocaleString("vi-VN", { minimumFractionDigits: 1, maximumFractionDigits: 2 }) : "–";
+  // Tag khách chọn kiểu "tốt nhưng phải chờ..." là góp ý, không phải khen
+  const laGopY = t => /nhưng|chờ|chưa|không|lâu|chậm/i.test(t);
+  function gomDanhGia(from, to) {
+    const salon = {}, tag = {}, nv = {}, che = [], days = [];
+    for (const d of Object.keys(D.danhGia || {}).sort()) {
+      if (d < from || d > to) continue;
+      const o = D.danhGia[d]; days.push(d);
+      for (const [s, v] of Object.entries(o.salon)) { const x = salon[s] || (salon[s] = [0, 0, 0]); v.forEach((n, i) => x[i] += n); }
+      for (const [s, t, n] of o.tag) { const k = s + "|" + t; tag[k] = (tag[k] || 0) + n; }
+      const getNv = (s, ten, vt) => nv[s + "|" + ten + "|" + vt] || (nv[s + "|" + ten + "|" + vt] = { s, ten, vt, luot: 0, sao: 0, xau: 0, khen: {}, che: 0 });
+      for (const [s, ten, vt, l, t, x] of o.nv) { const p = getNv(s, ten, vt); p.luot += l; p.sao += t; p.xau += x; }
+      for (const [s, ten, vt, t, n] of o.khen) { const p = getNv(s, ten, vt); p.khen[t] = (p.khen[t] || 0) + n; }
+      for (const [s, nguon, vt, nd, ten] of o.che) { che.push({ d, s, nguon, vt, nd, ten }); if (ten) getNv(s, ten, vt).che++; }
+    }
+    return { salon, tag, nv: Object.values(nv), che, days };
+  }
+  function renderDanhGia() {
+    const on = salonsOn(), g = gomDanhGia(st.from, st.to);
+    const sub = document.getElementById("subDg");
+    if (!g.days.length) {
+      sub.textContent = "Chưa có số liệu đánh giá cho kỳ này.";
+      document.getElementById("dgSalon").innerHTML = ""; document.getElementById("dgNv").innerHTML = ""; return;
+    }
+    sub.textContent = kyText(g.days[0], g.days[g.days.length - 1]) + " · " + on.map(s => {
+      const [l, t, x] = g.salon[s] || [0, 0, 0]; return `${D.salons[s]}: ${saoTB(t, l)}★ (${l} lượt) · ${x} bill 1–3 sao`;
+    }).join(" · ");
+    // Thẻ từng salon: điểm sao, tag khen, góp ý / chê
+    document.getElementById("dgSalon").innerHTML = on.map(s => {
+      const [l, t, x] = g.salon[s] || [0, 0, 0];
+      const tags = Object.entries(g.tag).filter(([k]) => k.startsWith(s + "|")).map(([k, n]) => [k.slice(4), n]).sort((a, b) => b[1] - a[1]);
+      const khen = tags.filter(([t]) => !laGopY(t)), gy = tags.filter(([t]) => laGopY(t));
+      const che = g.che.filter(c => c.s === s);
+      const chuaRo = Math.max(0, x - che.length);
+      const chip = ([t, n], cls) => `<span class="chip${cls || ""}">${esc(t)}<b>${n}</b></span>`;
+      return `<div class="card sal" style="--c:${COLOR[s]}">
+        <div class="ctitle">${salonTag(s)}</div>
+        <div class="stars"><span class="st">★</span> ${saoTB(t, l)}<small>${l} lượt đánh giá app/Zalo</small></div>
+        <div class="meta"><span class="tag" style="--c:${x ? "var(--crit)" : "var(--good)"}">${x ? x + " bill 1–3 sao" : "Không có bill 1–3 sao"}</span></div>
+        <div class="dgh">👍 Khách khen</div>
+        ${khen.length ? `<div class="chips">${khen.map(c => chip(c)).join("")}</div>` : `<div class="empty">Chưa có lượt khen.</div>`}
+        <div class="dgh">👎 Khách chê / góp ý</div>
+        ${gy.length ? `<div class="chips" style="margin-bottom:6px">${gy.map(c => chip(c, " gy")).join("")}</div>` : ""}
+        ${che.length ? `<ol class="che">${che.map(c => `<li><span class="src">${dm(c.d)} · ${esc(c.nguon || "")}${c.ten || c.vt ? " · " + esc(c.ten || c.vt) : ""}</span>${esc(c.nd)}</li>`).join("")}</ol>` : ""}
+        ${chuaRo ? `<div class="note" style="margin-top:4px">${chuaRo} bill 1–3 sao chưa ghi lý do (khách không chia sẻ hoặc CSKH đang xử lý).</div>` : ""}
+        ${!gy.length && !che.length && !chuaRo ? `<div class="empty">Không có lời chê 👏</div>` : ""}
+      </div>`;
+    }).join("");
+    // Theo nhân sự: nhiều lượt đánh giá trước, rồi điểm cao
+    const rows = g.nv.filter(o => on.includes(o.s) && (o.luot || o.che || Object.keys(o.khen).length))
+      .sort((a, b) => b.luot - a.luot || (b.luot ? b.sao / b.luot : 0) - (a.luot ? a.sao / a.luot : 0));
+    document.getElementById("dgNv").innerHTML = rows.length ? rows.map((o, i) => {
+      const ten = o.ten || o.vt + " (chưa rõ tên)", khen = Object.entries(o.khen).sort((a, b) => b[1] - a[1]);
+      const xau = Math.max(o.xau, o.che);
+      return `<li><span class="no">${i + 1}</span>${av(o.ten || o.vt, o.s)}<div>
+        <div class="who"><span><span class="n">${esc(ten)}</span> ${salonTag(o.s)}</span><span class="v">${o.luot ? saoTB(o.sao, o.luot) + ' <small style="color:var(--gold)">★</small>' : ""}</span></div>
+        <div class="meta">${o.ten ? `<span>${o.vt}</span>` : ""}${o.luot ? `<span>Lượt đánh giá <b>${o.luot}</b></span>` : ""}
+          ${xau ? `<span class="tag" style="--c:var(--crit)">${xau} bill 1–3 sao</span>` : ""}</div>
+        ${khen.length ? `<div class="chips" style="margin-top:6px">${khen.map(([t, n]) => `<span class="chip${laGopY(t) ? " gy" : ""}">${esc(t)}<b>${n}</b></span>`).join("")}</div>` : ""}
+      </div></li>`;
+    }).join("") : `<li><span></span><span></span><div class="empty">Chưa có lượt đánh giá gắn với nhân sự.</div></li>`;
+  }
+
   // ===== Bộ lọc =====
   const $from = document.getElementById("dFrom"), $to = document.getElementById("dTo");
   $from.min = $to.min = NGAY[0]; $from.max = $to.max = last;
@@ -596,7 +687,7 @@
   function renderAll() {
     paint();
     const g = gom(st.from, st.to);
-    renderHero(); renderTuyenDuong(); renderCanhBao(); renderTong(g); renderNv(g); renderHen(); renderBook();
+    renderHero(); renderTuyenDuong(); renderCanhBao(); renderTong(g); renderNv(g); renderHen(); renderBook(); renderDanhGia();
   }
   const on = (id, fn) => document.getElementById(id).addEventListener("click", e => {
     const b = e.target.closest("button"); if (b) { fn(b.dataset.v); renderAll(); }
