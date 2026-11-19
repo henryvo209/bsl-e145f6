@@ -88,6 +88,18 @@
   .runner .m { width: 22px; text-align: center; }
   .runner .v { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; }
   .crown { position: absolute; right: 12px; top: 10px; font-size: 22px; opacity: .9; }
+  /* Được khách khen (nằm dưới Ngôi sao ngày) */
+  .khen { margin-top: 12px; }
+  .kgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin-top: 10px; }
+  .kp { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: var(--gold-soft); }
+  .kp > div { flex: 1; min-width: 0; }
+  .kp .top { display: flex; align-items: baseline; gap: 8px; }
+  .kp .n { font-weight: 700; }
+  .kp .sv { margin-left: auto; font-weight: 800; white-space: nowrap; }
+  .kp .sv small { color: var(--gold); }
+  .kp .chips { margin-top: 6px; }
+  .kp .chip { background: var(--card); }
+  .ksal { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 10px; font-size: 13px; }
 
   /* ===== Nhắc hẹn lịch ===== */
   .remind { background: var(--warm-soft); box-shadow: 0 0 0 1px var(--warm-ring); }
@@ -215,6 +227,7 @@
     <div class="sec-h"><h2 id="tdTitle"></h2></div>
     <p class="sub" id="tdSub"></p>
     <div class="grid3" id="td"></div>
+    <div class="card khen" id="tdKhen"></div>
   </section>
 
   <!-- ===== 2. Nhắc hẹn lịch ===== -->
@@ -641,7 +654,7 @@
     document.getElementById("dgSalon").innerHTML = on.map(s => {
       const [l, t, x] = g.salon[s] || [0, 0, 0];
       const tags = Object.entries(g.tag).filter(([k]) => k.startsWith(s + "|")).map(([k, n]) => [k.slice(4), n]).sort((a, b) => b[1] - a[1]);
-      const khen = tags.filter(([t]) => !laGopY(t)), gy = tags.filter(([t]) => laGopY(t));
+      const gy = tags.filter(([t]) => laGopY(t)); // lời khen đã đưa lên mục Ngôi sao ngày
       const che = g.che.filter(c => c.s === s);
       const chuaRo = Math.max(0, x - che.length);
       const chip = ([t, n], cls) => `<span class="chip${cls || ""}">${esc(t)}<b>${n}</b></span>`;
@@ -649,8 +662,6 @@
         <div class="ctitle">${salonTag(s)}</div>
         <div class="stars"><span class="st">★</span> ${saoTB(t, l)}<small>${l} lượt đánh giá app/Zalo</small></div>
         <div class="meta"><span class="tag" style="--c:${x ? "var(--crit)" : "var(--good)"}">${x ? x + " bill 1–3 sao" : "Không có bill 1–3 sao"}</span></div>
-        <div class="dgh">👍 Khách khen</div>
-        ${khen.length ? `<div class="chips">${khen.map(c => chip(c)).join("")}</div>` : `<div class="empty">Chưa có lượt khen.</div>`}
         <div class="dgh">👎 Khách chê / góp ý</div>
         ${gy.length ? `<div class="chips" style="margin-bottom:6px">${gy.map(c => chip(c, " gy")).join("")}</div>` : ""}
         ${che.length ? `<ol class="che">${che.map(c => `<li><span class="src">${dm(c.d)} · ${esc(c.nguon || "")}${c.ten || c.vt ? " · " + esc(c.ten || c.vt) : ""}</span>${esc(c.nd)}</li>`).join("")}</ol>` : ""}
@@ -662,7 +673,8 @@
     const rows = g.nv.filter(o => on.includes(o.s) && (o.luot || o.che || Object.keys(o.khen).length))
       .sort((a, b) => b.luot - a.luot || (b.luot ? b.sao / b.luot : 0) - (a.luot ? a.sao / a.luot : 0));
     document.getElementById("dgNv").innerHTML = rows.length ? rows.map((o, i) => {
-      const ten = o.ten || o.vt + " (chưa rõ tên)", khen = Object.entries(o.khen).sort((a, b) => b[1] - a[1]);
+      // Chỉ giữ góp ý ở đây, lời khen hiện ở mục Ngôi sao ngày
+      const ten = o.ten || o.vt + " (chưa rõ tên)", khen = Object.entries(o.khen).filter(([t]) => laGopY(t)).sort((a, b) => b[1] - a[1]);
       const xau = Math.max(o.xau, o.che);
       return `<li><span class="no">${i + 1}</span>${av(o.ten || o.vt, o.s)}<div>
         <div class="who"><span><span class="n">${esc(ten)}</span> ${salonTag(o.s)}</span><span class="v">${o.luot ? saoTB(o.sao, o.luot) + ' <small style="color:var(--gold)">★</small>' : ""}</span></div>
@@ -671,6 +683,35 @@
         ${khen.length ? `<div class="chips" style="margin-top:6px">${khen.map(([t, n]) => `<span class="chip${laGopY(t) ? " gy" : ""}">${esc(t)}<b>${n}</b></span>`).join("")}</div>` : ""}
       </div></li>`;
     }).join("") : `<li><span></span><span></span><div class="empty">Chưa có lượt đánh giá gắn với nhân sự.</div></li>`;
+  }
+
+  // ===== Được khách khen – ngày đánh giá mới nhất, đặt dưới Ngôi sao ngày =====
+  function renderKhenTop() {
+    const box = document.getElementById("tdKhen");
+    const ngayDg = Object.keys(D.danhGia || {}).sort(), d = ngayDg[ngayDg.length - 1];
+    if (!d) { box.style.display = "none"; return; }
+    const on = salonsOn(), g = gomDanhGia(d, d);
+    // Nhân sự có lời khen (bỏ tag góp ý), nhiều lượt khen trước
+    const ds = g.nv.filter(o => on.includes(o.s)).map(o => {
+      const k = Object.entries(o.khen).filter(([t]) => !laGopY(t)).sort((a, b) => b[1] - a[1]);
+      return { ...o, k, tong: k.reduce((a, [, n]) => a + n, 0) };
+    }).filter(o => o.tong).sort((a, b) => b.tong - a.tong || b.sao / (b.luot || 1) - a.sao / (a.luot || 1));
+    // Lời khen chung theo salon: trừ phần đã gắn tên nhân sự để không lặp
+    const sal = on.map(s => {
+      const daGan = {};
+      ds.filter(o => o.s === s).forEach(o => o.k.forEach(([t, n]) => daGan[t] = (daGan[t] || 0) + n));
+      const k = Object.entries(g.tag).filter(([key]) => key.startsWith(s + "|") && !laGopY(key.slice(4)))
+        .map(([key, n]) => [key.slice(4), n - (daGan[key.slice(4)] || 0)]).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]);
+      return k.length ? `<div class="ksal">${salonTag(s)}<span class="tagS">khen chung:</span><span class="chips">${k.map(([t, n]) => `<span class="chip">${esc(t)}<b>${n}</b></span>`).join("")}</span></div>` : "";
+    }).join("");
+    box.style.display = "";
+    box.innerHTML = `<div class="ctitle">💐 Được khách khen<small>ngày ${dm(d)} · khách chấm trên app/Zalo</small></div>
+      ${ds.length ? `<div class="kgrid">${ds.map(o => `<div class="kp">${av(o.ten || o.vt, o.s)}<div>
+        <div class="top"><span class="n">${esc(o.ten || o.vt)}</span>${o.luot ? `<span class="sv">${saoTB(o.sao, o.luot)} <small>★</small></span>` : ""}</div>
+        <div class="tagS">${salonTag(o.s)} · ${o.vt}</div>
+        <div class="chips">${o.k.map(([t, n]) => `<span class="chip">${esc(t)}<b>${n}</b></span>`).join("")}</div>
+      </div></div>`).join("")}</div>` : `<div class="empty" style="margin-top:8px">Chưa có lượt khen gắn tên nhân sự.</div>`}
+      ${sal}`;
   }
 
   // ===== Bộ lọc =====
@@ -691,7 +732,7 @@
   function renderAll() {
     paint();
     const g = gom(st.from, st.to);
-    renderHero(); renderTuyenDuong(); renderCanhBao(); renderTong(g); renderNv(g); renderHen(); renderBook(); renderDanhGia();
+    renderHero(); renderTuyenDuong(); renderKhenTop(); renderCanhBao(); renderTong(g); renderNv(g); renderHen(); renderBook(); renderDanhGia();
   }
   const on = (id, fn) => document.getElementById(id).addEventListener("click", e => {
     const b = e.target.closest("button"); if (b) { fn(b.dataset.v); renderAll(); }
