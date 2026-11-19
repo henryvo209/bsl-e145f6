@@ -690,9 +690,13 @@
     const box = document.getElementById("tdKhen");
     const ngayDg = Object.keys(D.danhGia || {}).sort(), d = ngayDg[ngayDg.length - 1];
     if (!d) { box.style.display = "none"; return; }
-    const on = salonsOn(), g = gomDanhGia(d, d);
+    // Lấy 7 ngày gần nhất tính đến ngày đánh giá mới nhất
+    const t = new Date(d + "T00:00:00Z"); t.setUTCDate(t.getUTCDate() - 6);
+    const tu = t.toISOString().slice(0, 10);
+    const on = salonsOn(), g = gomDanhGia(tu, d);
     // Nhân sự có lời khen (bỏ tag góp ý), nhiều lượt khen trước
-    const ds = g.nv.filter(o => on.includes(o.s)).map(o => {
+    // Chưa rõ tên thì không làm thẻ riêng, gộp vào khen chung của salon
+    const ds = g.nv.filter(o => on.includes(o.s) && o.ten).map(o => {
       const k = Object.entries(o.khen).filter(([t]) => !laGopY(t)).sort((a, b) => b[1] - a[1]);
       return { ...o, k, tong: k.reduce((a, [, n]) => a + n, 0) };
     }).filter(o => o.tong).sort((a, b) => b.tong - a.tong || b.sao / (b.luot || 1) - a.sao / (a.luot || 1));
@@ -705,7 +709,7 @@
       return k.length ? `<div class="ksal">${salonTag(s)}<span class="tagS">khen chung:</span><span class="chips">${k.map(([t, n]) => `<span class="chip">${esc(t)}<b>${n}</b></span>`).join("")}</span></div>` : "";
     }).join("");
     box.style.display = "";
-    box.innerHTML = `<div class="ctitle">💐 Được khách khen<small>ngày ${dm(d)} · khách chấm trên app/Zalo</small></div>
+    box.innerHTML = `<div class="ctitle">💐 Được khách khen<small>7 ngày ${dm(tu)}–${dm(d)} · khách chấm trên app/Zalo</small></div>
       ${ds.length ? `<div class="kgrid">${ds.map(o => `<div class="kp">${av(o.ten || o.vt, o.s)}<div>
         <div class="top"><span class="n">${esc(o.ten || o.vt)}</span>${o.luot ? `<span class="sv">${saoTB(o.sao, o.luot)} <small>★</small></span>` : ""}</div>
         <div class="tagS">${salonTag(o.s)} · ${o.vt}</div>
